@@ -1,0 +1,76 @@
+name: Import Jianwu APK for analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_url:
+        description: 'Direct APK URL. The default is the currently discovered Jianwu v4.5.1 candidate.'
+        required: true
+        default: 'https://get.downkuai.com/download/167223'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK
+        shell: bash
+        env:
+          SOURCE_URL: ${{ inputs.source_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p work
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 --max-time 600 "$SOURCE_URL" -o work/jianwu.apk
+          test -s work/jianwu.apk
+          file work/jianwu.apk
+          sha256sum work/jianwu.apk | tee work/SHA256SUMS.txt
+
+      - name: Inspect APK structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -t work/jianwu.apk >/dev/null
+          unzip -l work/jianwu.apk | tee work/apk-file-list.txt
+          mkdir -p work/raw
+          unzip -o work/jianwu.apk -d work/raw >/dev/null
+          find work/raw -maxdepth 2 -type f | sort > work/raw-file-list.txt
+
+      - name: Install JADX CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, urllib.request, zipfile, io, os
+          api='https://api.github.com/repos/skylot/jadx/releases/latest'
+          req=urllib.request.Request(api, headers={'User-Agent':'github-actions'})
+          with urllib.request.urlopen(req, timeout=30) as r:
+              data=json.load(r)
+          asset=next(a for a in data['assets'] if a['name'].endswith('.zip') and 'latest' not in a['name'].lower())
+          print('Downloading', asset['name'])
+          req=urllib.request.Request(asset['browser_download_url'], headers={'User-Agent':'github-actions'})
+          with urllib.request.urlopen(req, timeout=120) as r:
+              payload=r.read()
+          with zipfile.ZipFile(io.BytesIO(payload)) as z:
+              z.extractall('jadx')
+          PY
+          chmod +x jadx/jadx-*/bin/jadx
+
+      - name: Decompile and extract manifest/resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/decompiled
+          JADXBIN=$(find jadx -type f -path '*/bin/jadx' | head -n 1)
+          "$JADXBIN" -d work/decompiled --show-bad-code work/jianwu.apk || true
+          find work/decompiled -maxdepth 3 -type f | sort > work/decompiled-file-list.txt || true
+          [ -f work/decompiled/resources/AndroidManifest.xml ] && cp work/decompiled/resources/AndroidManifest.xml work/AndroidManifest.xml || true
+
+      - name: Upload analysis package
+        uses: actions/upload-artifact@v4
+        with:
+          name: jianwu-analysis
+          path: work/
+          retention-days: 14

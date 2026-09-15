@@ -3,7 +3,7 @@
 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="14dp">
 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="江湖 · 独行录" android:textSize="30sp" android:textStyle="bold" android:textColor="#F5E6C8" android:gravity="center" android:padding="12dp"/>
 <ImageView android:layout_width="match_parent" android:layout_height="180dp" android:src="@drawable/jianhu_bg" android:scaleType="centerCrop" android:contentDescription="江湖山水与侠客剪影"/>
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="离线武侠 · 放置历练 · 功法 · 装备 · 灵宠" android:textColor="#B9C6D3" android:gravity="center" android:padding="10dp"/>
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="离线武侠 · 放置历练 · 功法 · 装备 · 灵宠 · 悬赏" android:textColor="#B9C6D3" android:gravity="center" android:padding="10dp"/>
 <TextView android:id="@+id/tvStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="16sp" android:textColor="#F5E6C8" android:background="#1B2836" android:padding="14dp"/>
 <TextView android:id="@+id/tvLog" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="15sp" android:textColor="#C9D6E3" android:padding="12dp"/>
 <TextView android:id="@+id/tvMap" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="15sp" android:textColor="#D7C9A7" android:background="#18222C" android:padding="12dp"/>
@@ -23,9 +23,12 @@
 <Button android:id="@+id/btnArtifact" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="法器淬体"/>
 <Button android:id="@+id/btnTower" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="挑战幻塔"/>
 <Button android:id="@+id/btnTravel" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="游历江湖"/>
+<Button android:id="@+id/btnBounty" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="江湖悬赏 · 每日3单"/>
+<Button android:id="@+id/btnRetreat" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="闭关修炼 · 大量经验"/>
 <Button android:id="@+id/btnRest" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="休息恢复生命"/>
 <Button android:id="@+id/btnMedicine" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="客栈购买金疮药 · 20两"/>
 <Button android:id="@+id/btnUse" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="使用金疮药"/>
+<Button android:id="@+id/btnModify" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="⚙ 修改菜单 · 货币 / 属性"/>
 <Button android:id="@+id/btnSave" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="保存进度"/>
 <Button android:id="@+id/btnReset" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="删除存档并重新开始"/>
 </LinearLayout></ScrollView>

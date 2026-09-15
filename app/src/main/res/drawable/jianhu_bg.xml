@@ -2,7 +2,7 @@
  <path android:fillColor="#152B3B" android:pathData="M0,180 L0,125 L55,72 L105,120 L155,55 L220,120 L280,65 L360,130 L360,180 Z"/>
  <path android:fillColor="#1E4650" android:pathData="M0,180 L0,145 L80,98 L145,145 L210,90 L280,145 L330,105 L360,125 L360,180 Z"/>
  <path android:fillColor="#0E1820" android:pathData="M0,180 L0,165 L80,150 L135,165 L190,145 L250,166 L315,148 L360,160 L360,180 Z"/>
- <circle android:fillColor="#E7D6A8" android:cx="292" android:cy="38" android:r="18"/>
+ <path android:fillColor="#E7D6A8" android:pathData="M292,20 C282.06,20 274,28.06 274,38 C274,47.94 282.06,56 292,56 C301.94,56 310,47.94 310,38 C310,28.06 301.94,20 292,20 Z"/>
  <path android:fillColor="#0B1117" android:pathData="M172,150 L180,108 L185,87 L192,108 L202,150 Z"/>
  <path android:fillColor="#263746" android:pathData="M186,88 L160,110 L212,110 Z"/>
  <path android:fillColor="#0B1117" android:pathData="M186,102 L150,126 L222,126 Z"/>

@@ -69,11 +69,14 @@ public class MainActivity extends Activity {
     private void attack(){
         if(enemy==null||!enemy.isAlive()||player.getHp()<=0)return;
         int d=game.damage(player,enemy); enemy.damage(d);
+        String hit;
+        if(CombatEngine.wasPlayerMiss()) hit="你这一击落空！";
+        else hit=CombatEngine.wasPlayerCrit()?"暴击！造成"+d+"点伤害。":"你造成"+d+"点伤害。";
         if(!enemy.isAlive()){
             player.addExp(enemy.getExp());player.setSilver(player.getSilver()+enemy.getSilver());boolean drop=game.drop(inventory);game.petExp++;
             if(game.petExp>=game.petLevel*10){game.petExp=0;game.petLevel++;} enemy=null;
-            refresh("胜利！获得经验与银两"+(drop?"，并掉落锻造材料。":"。"));
-        }else{CombatEngine.enemyAttack(player,enemy);refresh("你造成"+d+"点伤害，敌人反击。 ");}
+            refresh("胜利！"+hit+" 获得经验与银两"+(drop?"，并掉落锻造材料。":"。"));
+        }else{CombatEngine.enemyAttack(player,enemy);String counter=CombatEngine.wasEnemyMiss()?"敌人反击落空。":"敌人反击。";refresh(hit+" "+counter);}
         save();
     }
     private void rest(){player.setHp(player.getMaxHp());refresh("休息恢复生命。 ");save();}

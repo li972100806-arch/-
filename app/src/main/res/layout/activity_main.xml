@@ -17,6 +17,12 @@
 <Button android:id="@+id/btnEquip" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="打造装备"/>
 <TextView android:id="@+id/tvPet" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#C9D6E3" android:background="#18222C" android:padding="12dp"/>
 <Button android:id="@+id/btnPet" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="灵宠修炼"/>
+<TextView android:id="@+id/tvExtra" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#D7C9A7" android:background="#18222C" android:padding="12dp"/>
+<Button android:id="@+id/btnSect" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="门府升级"/>
+<Button android:id="@+id/btnMarket" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="坊市 · 购买功法残页"/>
+<Button android:id="@+id/btnArtifact" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="法器淬体"/>
+<Button android:id="@+id/btnTower" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="挑战幻塔"/>
+<Button android:id="@+id/btnTravel" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="游历江湖"/>
 <Button android:id="@+id/btnRest" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="休息恢复生命"/>
 <Button android:id="@+id/btnMedicine" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="客栈购买金疮药 · 20两"/>
 <Button android:id="@+id/btnUse" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="使用金疮药"/>

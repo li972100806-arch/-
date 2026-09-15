@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       source_url:
-        description: 'Direct APK URL. The default is the currently discovered Jianwu v4.5.1 candidate.'
+        description: 'APK direct URL or Jianwu download page URL'
         required: true
-        default: 'https://get.downkuai.com/download/167223'
+        default: 'https://www.tvmao.com/sjgame/300219.html'
         type: string
 
 permissions:
@@ -16,23 +16,79 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Download APK
+      - name: Resolve and download APK
         shell: bash
         env:
           SOURCE_URL: ${{ inputs.source_url }}
         run: |
           set -euo pipefail
           mkdir -p work
-          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 --max-time 600 "$SOURCE_URL" -o work/jianwu.apk
+          python3 - <<'PY'
+          import re, sys, urllib.request
+          from urllib.parse import urljoin
+          src = sys.argv[1]
+          req = urllib.request.Request(src, headers={
+              'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/128 Safari/537.36'
+          })
+          with urllib.request.urlopen(req, timeout=60) as r:
+              data = r.read()
+              ctype = r.headers.get('Content-Type','')
+              final = r.geturl()
+          if data[:4] == b'PK\\x03\\x04':
+              open('work/jianwu.apk','wb').write(data)
+              print('Source itself is an APK:', final)
+              raise SystemExit
+          text = data.decode('utf-8','ignore')
+          candidates=[]
+          for href in re.findall(r'''(?:href|src)\\s*=\\s*["']([^"']+)["']''', text, re.I):
+              u=urljoin(final, href)
+              if '.apk' in u.lower() or 'download' in u.lower():
+                  candidates.append(u)
+          # Keep unique candidates and prefer explicit APK-looking links.
+          seen=[]
+          for u in candidates:
+              if u not in seen: seen.append(u)
+          print('Candidate download links:', len(seen))
+          open('work/candidates.txt','w').write('\\n'.join(seen))
+          if not seen:
+              print('No download link found on source page', file=sys.stderr)
+              raise SystemExit(2)
+          open('work/resolved_url.txt','w').write(seen[0])
+          PY
+          SOURCE_URL="$SOURCE_URL" python3 - <<'PY'
+          import os, urllib.request
+          src=os.environ['SOURCE_URL']
+          try:
+              page=open('work/candidates.txt').read().splitlines()
+          except FileNotFoundError:
+              page=[]
+          urls=page[:]
+          if not urls: urls=[src]
+          for u in urls:
+              try:
+                  print('Trying:',u)
+                  req=urllib.request.Request(u, headers={'User-Agent':'Mozilla/5.0'})
+                  with urllib.request.urlopen(req, timeout=120) as r:
+                      data=r.read()
+                  if data[:4] == b'PK\\x03\\x04' and len(data) > 1024*1024:
+                      open('work/jianwu.apk','wb').write(data)
+                      open('work/resolved_url.txt','w').write(u)
+                      print('APK obtained:',len(data),'bytes')
+                      break
+              except Exception as e:
+                  print('Failed:',repr(e))
+          else:
+              raise SystemExit('No valid APK could be downloaded from the discovered links')
+          PY
           test -s work/jianwu.apk
           file work/jianwu.apk
           sha256sum work/jianwu.apk | tee work/SHA256SUMS.txt
+          unzip -t work/jianwu.apk >/dev/null
 
       - name: Inspect APK structure
         shell: bash
         run: |
           set -euo pipefail
-          unzip -t work/jianwu.apk >/dev/null
           unzip -l work/jianwu.apk | tee work/apk-file-list.txt
           mkdir -p work/raw
           unzip -o work/jianwu.apk -d work/raw >/dev/null
@@ -43,13 +99,12 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, urllib.request, zipfile, io, os
+          import json, urllib.request, zipfile, io
           api='https://api.github.com/repos/skylot/jadx/releases/latest'
           req=urllib.request.Request(api, headers={'User-Agent':'github-actions'})
           with urllib.request.urlopen(req, timeout=30) as r:
               data=json.load(r)
           asset=next(a for a in data['assets'] if a['name'].endswith('.zip') and 'latest' not in a['name'].lower())
-          print('Downloading', asset['name'])
           req=urllib.request.Request(asset['browser_download_url'], headers={'User-Agent':'github-actions'})
           with urllib.request.urlopen(req, timeout=120) as r:
               payload=r.read()

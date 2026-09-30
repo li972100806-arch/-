@@ -1,0 +1,44 @@
+package com.jianghu.offline;
+
+import android.app.*;
+import android.os.*;
+import android.content.*;
+import android.graphics.*;
+import android.view.*;
+
+public class MainActivity extends Activity {
+    static final int GROWTH=100;
+    Game v;
+    @Override public void onCreate(Bundle b){super.onCreate(b);v=new Game(this);setContentView(v);}
+    @Override protected void onPause(){super.onPause();v.save();}
+
+    class Game extends View{
+        Paint p=new Paint(3); android.content.SharedPreferences s;
+        int tab=0,lv=1,exp=0,hp=12000,maxHp=12000,atk=2000,def=800,stamina=100,energy=100;
+        long silver=1000,jade=20; int floor=1,skill=1,gear=1,crit=5,kills=0;
+        String[] tabs={"江湖","修炼","战斗","背包","人物"};
+        Game(Context c){super(c);s=getSharedPreferences("jianghu",0);load();}
+        void load(){lv=s.getInt("lv",1);exp=s.getInt("exp",0);hp=s.getInt("hp",12000);maxHp=s.getInt("max",12000);atk=s.getInt("atk",2000);def=s.getInt("def",800);stamina=s.getInt("sta",100);energy=s.getInt("ene",100);silver=s.getLong("silver",1000);jade=s.getLong("jade",20);floor=s.getInt("floor",1);skill=s.getInt("skill",1);gear=s.getInt("gear",1);crit=s.getInt("crit",5);kills=s.getInt("kills",0);}
+        void save(){s.edit().putInt("lv",lv).putInt("exp",exp).putInt("hp",hp).putInt("max",maxHp).putInt("atk",atk).putInt("def",def).putInt("sta",stamina).putInt("ene",energy).putLong("silver",silver).putLong("jade",jade).putInt("floor",floor).putInt("skill",skill).putInt("gear",gear).putInt("crit",crit).putInt("kills",kills).apply();}
+        void level(){while(exp>=100){exp-=100;lv++;maxHp+=1500;hp=maxHp;atk+=400;def+=200;if(lv%5==0)jade+=1;}}
+        void text(Canvas c,String t,float x,float y,float z,int color){p.setStyle(Paint.Style.FILL);p.setTextSize(z);p.setColor(color);c.drawText(t,x,y,p);}
+        void box(Canvas c,float l,float t,float r,float b,int color){p.setColor(color);p.setStyle(Paint.Style.FILL);c.drawRoundRect(l,t,r,b,18,18,p);}
+        void btn(Canvas c,String t,float l,float y,float r){box(c,l,y,r,y+55,Color.rgb(102,72,43));p.setTextAlign(Paint.Align.CENTER);text(c,t,(l+r)/2,y+35,17,Color.WHITE);p.setTextAlign(Paint.Align.LEFT);}
+        protected void onDraw(Canvas c){float w=getWidth(),h=getHeight();c.drawColor(Color.rgb(222,207,180));box(c,0,0,w,75,Color.rgb(48,36,28));text(c,"江湖·离线版",18,46,25,Color.WHITE);text(c,"Lv."+lv+"  银两 "+silver,w-190,35,14,Color.WHITE);text(c,"成长 ×100",w-190,58,13,Color.WHITE);
+            box(c,12,88,w-12,h-145,Color.rgb(247,239,220)); if(tab==0)world(c,w);else if(tab==1)cult(c,w);else if(tab==2)battle(c,w);else if(tab==3)bag(c,w);else person(c,w);
+            box(c,0,h-130,w,h,Color.rgb(43,33,26));for(int i=0;i<5;i++){if(i==tab)box(c,i*w/5,h-130,(i+1)*w/5,h-125,Color.rgb(190,145,65));text(c,tabs[i],i*w/5+w/10-16,h-75,15,Color.WHITE);}postInvalidateDelayed(1000);if(stamina<100)stamina++;if(energy<100)energy++;save();}
+        void world(Canvas c,float w){text(c,"青石镇",30,130,25,Color.rgb(70,45,25));text(c,"离线挂机与江湖探索",30,158,14,Color.DKGRAY);text(c,"当前副本：第 "+floor+" 层",30,190,16,Color.DKGRAY);text(c,"任务：击败山贼 "+kills+" 次",30,220,15,Color.DKGRAY);btn(c,"切换地图",30,255,w/2-10);btn(c,"杂货铺",w/2+10,255,w-30);btn(c,"每日签到",30,330,w-30);}
+        void cult(Canvas c,float w){text(c,"修炼",30,130,25,Color.rgb(70,45,25));text(c,"经验 "+exp+" / 100",30,170,16,Color.DKGRAY);text(c,"武学等级："+skill+"    暴击："+crit+"%",30,205,15,Color.DKGRAY);btn(c,"修炼一次",30,245,w-30);btn(c,"升级武学",30,320,w-30);}
+        void battle(Canvas c,float w){text(c,"历练战斗",30,130,25,Color.rgb(70,45,25));text(c,"山贼 · 第 "+floor+" 层",30,170,20,Color.rgb(70,45,25));text(c,"气血 "+hp+" / "+maxHp,30,205,14,Color.DKGRAY);text(c,"攻击 "+atk+"  防御 "+def+"  体力 "+stamina,30,230,14,Color.DKGRAY);text(c,"技能能量 "+energy+" / 100",30,255,14,Color.DKGRAY);btn(c,"挑战",30,280,w-30);btn(c,"绝技·流云破",30,350,w-30);btn(c,"连续挑战 ×10",30,420,w-30);}
+        void bag(Canvas c,float w){text(c,"背包",30,130,25,Color.rgb(70,45,25));text(c,"青锋剑 · 品质 "+gear,35,175,17,Color.DKGRAY);text(c,"回春丹 ×999",35,215,17,Color.DKGRAY);text(c,"强化石 · 战斗掉落",35,255,15,Color.DKGRAY);btn(c,"使用回春丹",30,300,w-30);}
+        void person(Canvas c,float w){text(c,"人物",30,130,25,Color.rgb(70,45,25));text(c,"等级："+lv,35,175,17,Color.DKGRAY);text(c,"气血："+hp+" / "+maxHp,35,210,17,Color.DKGRAY);text(c,"攻击："+atk,35,245,17,Color.DKGRAY);text(c,"防御："+def,35,280,17,Color.DKGRAY);text(c,"元宝："+jade+"  暴击："+crit+"%",35,315,17,Color.DKGRAY);btn(c,"强化装备",30,355,w-30);btn(c,"本地存档",30,430,w-30);}
+        public boolean onTouchEvent(android.view.MotionEvent e){if(e.getAction()!=1)return true;float x=e.getX(),y=e.getY(),w=getWidth(),h=getHeight();if(y>h-135){tab=Math.min(4,(int)(x/(w/5)));invalidate();return true;}
+            if(tab==1&&y>235&&y<315){exp+=1500;level();invalidate();return true;}if(tab==1&&y>315&&y<405){long cost=200*skill;if(silver>=cost){silver-=cost;skill++;atk+=500;def+=300;crit=Math.min(80,crit+2);save();}invalidate();return true;}
+            if(tab==2&&y>270&&y<345){fight(1);return true;}if(tab==2&&y>345&&y<420){ultimate();return true;}if(tab==2&&y>420&&y<500){fight(10);return true;}
+            if(tab==3&&y>285){hp=Math.min(maxHp,hp+maxHp/2);invalidate();return true;}if(tab==4&&y>345&&y<420){long cost=300*(gear+1);if(silver>=cost){silver-=cost;gear++;atk+=800;def+=500;maxHp+=2000;hp=maxHp;save();}invalidate();return true;}if(tab==4&&y>420){saveDialog();return true;}return true;}
+        void fight(int n){n=Math.min(n,Math.max(0,stamina/10));if(n<1){toast("体力不足");return;}stamina-=n*10;for(int i=0;i<n;i++){int incoming=Math.max(1,14+lv*2+floor*2-def);hp-=incoming;if(hp<=0){hp=maxHp/2;break;}int dealt=Math.max(100,atk);if(Math.random()*100<crit)dealt*=2;exp+=25;silver+=5000+floor*1000;kills++;if(kills%5==0)floor++;if(Math.random()<.15)gear=Math.min(5,gear+1);level();}save();invalidate();}
+        void ultimate(){if(energy<30){toast("技能能量不足");return;}energy-=30;exp+=150;silver+=200;crit=Math.min(80,crit+1);level();save();invalidate();}
+        void saveDialog(){new AlertDialog.Builder(MainActivity.this).setTitle("本地存档").setMessage("数据只保存在本机。\n等级："+lv+"\n银两："+silver).setPositiveButton("保存",(d,w)->save()).setNegativeButton("关闭",null).show();}
+        void toast(String s){android.widget.Toast.makeText(MainActivity.this,s,android.widget.Toast.LENGTH_SHORT).show();}
+    }
+}

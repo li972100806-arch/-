@@ -18,18 +18,26 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Configure runner Android SDK
+      - name: Install Android command-line tools
         shell: bash
         run: |
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
-          sdkmanager --version
+          set -e
+          SDK_ROOT="$RUNNER_TEMP/android-sdk"
+          mkdir -p "$SDK_ROOT/cmdline-tools"
+          curl -fsSL -o "$RUNNER_TEMP/cmdline-tools.zip" https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
+          unzip -q "$RUNNER_TEMP/cmdline-tools.zip" -d "$RUNNER_TEMP/cmdline-tools"
+          mv "$RUNNER_TEMP/cmdline-tools/cmdline-tools" "$SDK_ROOT/cmdline-tools/latest"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --version
 
       - name: Accept Android SDK licenses
         shell: bash
         run: yes | sdkmanager --licenses >/dev/null || true
 
-      - name: Install Android 35 build packages
+      - name: Install Android 35 packages
         shell: bash
         run: |
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
